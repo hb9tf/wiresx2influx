@@ -74,7 +74,7 @@ type Location struct {
 func parseLocation(l string) (*Location, error) {
 	l = strings.TrimSpace(l)
 	if l == "" {
-		return &Location{}, nil
+		return nil, nil
 	}
 	l = strings.ReplaceAll(l, "Lat:", "")
 	l = strings.ReplaceAll(l, "Lon:", "")
@@ -163,7 +163,7 @@ func main() {
 	// Feed InfluxDB
 	go func() {
 		for l := range logChan {
-			fmt.Printf("Message from %q (%s) (lat:%f, lon:%f)\n", l.Callsign, l.Dev.InferDevice(), l.Loc.Lat, l.Loc.Lon)
+			fmt.Printf("Message from %q (%s)\n", l.Callsign, l.Dev.InferDevice())
 		}
 	}()
 
