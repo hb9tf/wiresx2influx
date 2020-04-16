@@ -164,9 +164,9 @@ func main() {
 	// TODO: Needs to move into a config file.
 	infile := "WiresAccess.log"
 	timezone := "Europe/Zurich"
-	influxServer := "http://192.168.73.12:8086"
+	influxServer := "http://192.168.73.12:9999"
 	influxAuth := ""
-	influxOrg := ""
+	influxOrg := "hb9tf"
 	influxBucket := "wiresx"
 	influxTags := map[string]string{
 		"relais":        "lszh",
