@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -10,6 +11,7 @@ import (
 
 	"4d63.com/tz"
 	"github.com/hpcloud/tail"
+	influxdb2 "github.com/influxdata/influxdb-client-go"
 )
 
 const (
@@ -157,10 +159,20 @@ func parseLogline(line string, timeLoc *time.Location) (*WiresXLog, error) {
 }
 
 func main() {
+	ctx := context.Background()
+
 	// TODO: Needs to move into a config file.
 	infile := "WiresAccess.log"
-	// TODO: Move location string to flag or config.
 	timezone := "Europe/Zurich"
+	influxServer := "http://192.168.73.12:8086"
+	influxAuth := ""
+	influxOrg := ""
+	influxBucket := "wiresx"
+	influxTags := map[string]string{
+		"relais":        "lszh",
+		"wiresx2influx": "0.1",
+	}
+
 	loc, err := tz.LoadLocation(timezone)
 	if err != nil {
 		log.Printf("unable to resolve location %q: %s", timezone, err)
@@ -170,10 +182,24 @@ func main() {
 	logChan := make(chan *WiresXLog, 100)
 
 	// Feed InfluxDB
+	influx := influxdb2.NewClient(influxServer, influxAuth)
+	writeApi := influx.WriteApiBlocking(influxOrg, influxBucket)
 	go func() {
 		for l := range logChan {
-			// TODO: Feed to InfluxDB.
 			fmt.Printf("%s: Message from %q (%s)\n", l.Timestamp, l.Callsign, l.Dev.InferDevice())
+			p := influxdb2.NewPoint("callsign",
+				influxTags,
+				map[string]interface{}{
+					"value":        l.Callsign,
+					"device_raw":   l.Dev,
+					"device":       l.Dev.InferDevice(),
+					"source":       l.Source,
+					"location_lat": l.Loc.Lat,
+					"location_lon": l.Loc.Lon,
+					"description":  l.Description,
+				},
+				l.Timestamp)
+			writeApi.WritePoint(ctx, p)
 		}
 	}()
 
