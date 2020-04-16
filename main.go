@@ -163,6 +163,7 @@ func main() {
 
 	// TODO: Needs to move into a config file.
 	infile := "WiresAccess.log"
+	ingestWholeFile := false
 	timezone := "Europe/Zurich"
 	influxServer := "http://192.168.73.12:9999"
 	influxAuth := ""
@@ -209,9 +210,10 @@ func main() {
 	}()
 
 	// Tail log
-	// TODO: Handle offsets when binary is restarted. Options:
-	// - pass in offset to TailFile (set to EOF?)
-	// - filter for timestamp (newer than "now")
+	whence := os.SEEK_END
+	if ingestWholeFile {
+		whence = os.SEEK_SET
+	}
 	t, err := tail.TailFile(infile, tail.Config{
 		ReOpen:    true,  // Reopen recreated files (tail -F)
 		MustExist: true,  // Fail early if the file does not exist
@@ -220,6 +222,10 @@ func main() {
 		// Logger, when nil, is set to tail.DefaultLogger
 		// To disable logging: set field to tail.DiscardingLogger
 		Logger: tail.DiscardingLogger,
+		Location: &tail.SeekInfo{
+			Whence: whence,
+			Offset: 0,
+		},
 	})
 	if err != nil {
 		log.Printf("unable to tail file %q: %s", infile, err)
