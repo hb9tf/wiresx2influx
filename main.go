@@ -196,9 +196,9 @@ func main() {
 				influxTags,
 				map[string]interface{}{
 					"value":        l.Callsign,
-					"device_raw":   l.Dev,
+					"device_raw":   string(l.Dev),
 					"device":       l.Dev.InferDevice(),
-					"source":       l.Source,
+					"source":       string(l.Source),
 					"location_lat": lat,
 					"location_lon": lon,
 					"description":  l.Description,
