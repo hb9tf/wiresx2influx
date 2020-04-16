@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"4d63.com/tz"
 	"github.com/hpcloud/tail"
 )
 
@@ -159,10 +160,10 @@ func main() {
 	// TODO: Needs to move into a config file.
 	infile := "WiresAccess.log"
 	// TODO: Move location string to flag or config.
-	tz := "Europe/Zurich"
-	loc, err := time.LoadLocation(tz)
+	timezone := "Europe/Zurich"
+	loc, err := tz.LoadLocation(timezone)
 	if err != nil {
-		log.Printf("unable to resolve location %q: %s", tz, err)
+		log.Printf("unable to resolve location %q: %s", timezone, err)
 		os.Exit(1)
 	}
 
