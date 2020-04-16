@@ -132,12 +132,12 @@ func parseLocation(l string) (*Location, error) {
 	return &Location{lat, lon}, nil
 }
 
-func parseLogline(line string) (*WiresXLog, error) {
+func parseLogline(line string, timeLoc *time.Location) (*WiresXLog, error) {
 	parts := strings.Split(line, "%")
 	if len(parts) != 13 {
 		return nil, fmt.Errorf("unexpected amount of tokens (want: 13): %s", line)
 	}
-	ts, err := time.Parse(logTimeFmt, parts[3])
+	ts, err := time.ParseInLocation(logTimeFmt, parts[3], timeLoc)
 	if err != nil {
 		return nil, fmt.Errorf("invalid timestamp format (want: %q): %s", logTimeFmt, parts[3])
 	}
@@ -158,24 +158,43 @@ func parseLogline(line string) (*WiresXLog, error) {
 func main() {
 	// TODO: Needs to move into a config file.
 	infile := "WiresAccess.log"
+	// TODO: Move location string to flag or config.
+	tz := "Europe/Zurich"
+	loc, err := time.LoadLocation(tz)
+	if err != nil {
+		log.Printf("unable to resolve location %q: %s", tz, err)
+		os.Exit(1)
+	}
 
 	logChan := make(chan *WiresXLog, 100)
 
 	// Feed InfluxDB
 	go func() {
 		for l := range logChan {
-			fmt.Printf("Message from %q (%s)\n", l.Callsign, l.Dev.InferDevice())
+			// TODO: Feed to InfluxDB.
+			fmt.Printf("%s: Message from %q (%s)\n", l.Timestamp, l.Callsign, l.Dev.InferDevice())
 		}
 	}()
 
 	// Tail log
-	t, err := tail.TailFile(infile, tail.Config{Follow: true})
+	// TODO: Handle offsets when binary is restarted. Options:
+	// - pass in offset to TailFile (set to EOF?)
+	// - filter for timestamp (newer than "now")
+	t, err := tail.TailFile(infile, tail.Config{
+		ReOpen:    true,  // Reopen recreated files (tail -F)
+		MustExist: true,  // Fail early if the file does not exist
+		Poll:      false, // Poll for file changes instead of using inotify
+		Follow:    true,  // Continue looking for new lines (tail -f)
+		// Logger, when nil, is set to tail.DefaultLogger
+		// To disable logging: set field to tail.DiscardingLogger
+		Logger: tail.DiscardingLogger,
+	})
 	if err != nil {
 		log.Printf("unable to tail file %q: %s", infile, err)
 		os.Exit(1)
 	}
 	for line := range t.Lines {
-		wl, err := parseLogline(line.Text)
+		wl, err := parseLogline(line.Text, loc)
 		if err != nil {
 			log.Printf("error parsing log line: %s", err)
 			continue
