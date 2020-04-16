@@ -1,13 +1,14 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"log"
 	"os"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/hpcloud/tail"
 )
 
 const (
@@ -168,14 +169,13 @@ func main() {
 	}()
 
 	// Tail log
-	f, err := os.Open(infile)
+	t, err := tail.TailFile(infile, tail.Config{Follow: true})
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("unable to tail file %q: %s", infile, err)
+		os.Exit(1)
 	}
-	defer f.Close()
-	scanner := bufio.NewScanner(f)
-	for scanner.Scan() {
-		wl, err := parseLogline(scanner.Text())
+	for line := range t.Lines {
+		wl, err := parseLogline(line.Text)
 		if err != nil {
 			log.Printf("error parsing log line: %s", err)
 			continue
