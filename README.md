@@ -4,8 +4,8 @@ Parses the Wires-X log file `WiresAccess.log` and forwards the entries to a Infl
 
 ## Config file
 
-The config file *must* be in the same directory with the binary
-and *must* be named `wiresx2influx.conf`.
+The config file **must** be in the same directory with the binary
+and **must** be named `wiresx2influx.conf`.
 
 The following is a copy and paste example of a config:
 
