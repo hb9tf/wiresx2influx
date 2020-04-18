@@ -88,6 +88,7 @@ $RECYCLE.BIN/
 *.lnk
 
 # Custom
+wiresx2influx
 *.exe
 *.log
 *.conf

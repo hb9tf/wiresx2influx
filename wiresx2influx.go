@@ -3,12 +3,14 @@ package main
 import (
 	"context"
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
 
 	"4d63.com/tz"
 	"github.com/hb9tf/wiresx2influx/config"
 	"github.com/hb9tf/wiresx2influx/influx"
+	"github.com/hb9tf/wiresx2influx/slack"
 	"github.com/hb9tf/wiresx2influx/wiresx"
 	influxdb2 "github.com/influxdata/influxdb-client-go"
 )
@@ -37,20 +39,41 @@ func main() {
 		os.Exit(1)
 	}
 
-	logChan := make(chan *wiresx.Log, 100)
+	chans := []chan *wiresx.Log{}
+	tags := map[string]string{
+		"repeater": conf.Repeater,
+	}
 
 	// Feed InfluxDB
-	client := influxdb2.NewClient(conf.Influx.Server, conf.Influx.AuthToken)
-	writeApi := client.WriteApiBlocking(conf.Influx.Organization, conf.Influx.Bucket)
-	go func() {
-		influx.Feed(ctx, logChan, writeApi, map[string]string{
-			"repeater": conf.Influx.Repeater,
-		})
-	}()
+	if conf.Influx.Server != "" {
+		log.Printf("starting InfluxDB feeder to %q", conf.Influx.Server)
+		influxLogChan := make(chan *wiresx.Log, 100)
+		chans = append(chans, influxLogChan)
+
+		client := influxdb2.NewClient(conf.Influx.Server, conf.Influx.AuthToken)
+		writeApi := client.WriteApiBlocking(conf.Influx.Organization, conf.Influx.Bucket)
+		go func() {
+			influx.Feed(ctx, influxLogChan, writeApi, tags, conf.Influx.Dry)
+		}()
+	}
+
+	// Feed Slack
+	if conf.Slack.Webhook != "" {
+		log.Printf("starting Slack feeder")
+		slackLogChan := make(chan *wiresx.Log, 100)
+		chans = append(chans, slackLogChan)
+
+		slackClient := &slack.Slacker{
+			conf.Slack.Webhook,
+			&http.Client{},
+		}
+		go func() {
+			slack.Feed(ctx, slackLogChan, slackClient, tags, conf.Slack.Dry)
+		}()
+	}
 
 	// Tail log
-	defer close(logChan)
-	if err := wiresx.TailLog(conf.WiresX.Logfile, conf.WiresX.IngestWholeFile, loc, logChan); err != nil {
+	if err := wiresx.TailLog(conf.WiresX.Logfile, conf.WiresX.IngestWholeFile, loc, chans); err != nil {
 		log.Printf("error in file ingestion: %s", err)
 		os.Exit(1)
 	}

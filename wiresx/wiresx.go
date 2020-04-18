@@ -155,7 +155,7 @@ func parseLogline(line string, timeLoc *time.Location) (*Log, error) {
 	}, nil
 }
 
-func TailLog(path string, ingestWholeFile bool, loc *time.Location, logChan chan *Log) error {
+func TailLog(path string, ingestWholeFile bool, loc *time.Location, chans []chan *Log) error {
 	whence := os.SEEK_END
 	if ingestWholeFile {
 		whence = os.SEEK_SET
@@ -182,7 +182,10 @@ func TailLog(path string, ingestWholeFile bool, loc *time.Location, logChan chan
 			log.Printf("error parsing log line: %s", err)
 			continue
 		}
-		logChan <- wl
+		log.Printf("%s: Message from %q (%s)\n", wl.Timestamp, wl.Callsign, wl.Dev.InferDevice())
+		for _, c := range chans {
+			c <- wl
+		}
 	}
 	return nil
 }

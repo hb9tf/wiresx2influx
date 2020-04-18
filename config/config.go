@@ -9,8 +9,11 @@ import (
 )
 
 type Config struct {
+	Repeater string `toml:"repeater"`
+
 	WiresX WiresX `toml:"wiresx"`
 	Influx Influx `toml:"influx"`
+	Slack  Slack  `toml:"slack"`
 }
 
 type WiresX struct {
@@ -24,9 +27,12 @@ type Influx struct {
 	AuthToken    string `toml:"auth_token"`
 	Organization string `toml:"organization"`
 	Bucket       string `toml:"bucket"`
+	Dry          bool   `toml:"dry"`
+}
 
-	// Tags
-	Repeater string `toml:"repeater"`
+type Slack struct {
+	Webhook string `toml:"webhook"`
+	Dry     bool   `toml:"dry"`
 }
 
 func Read(path string) (*Config, error) {

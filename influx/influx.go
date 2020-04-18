@@ -8,16 +8,15 @@ import (
 	influxdb2 "github.com/influxdata/influxdb-client-go"
 )
 
-func Feed(ctx context.Context, logChan chan *wiresx.Log, api influxdb2.WriteApiBlocking, influxTags map[string]string) {
+func Feed(ctx context.Context, logChan chan *wiresx.Log, api influxdb2.WriteApiBlocking, tags map[string]string, dry bool) {
 	for l := range logChan {
-		log.Printf("%s: Message from %q (%s)\n", l.Timestamp, l.Callsign, l.Dev.InferDevice())
 		var lat, lon float64
 		if l.Loc != nil {
 			lat = l.Loc.Lat
 			lon = l.Loc.Lon
 		}
 		p := influxdb2.NewPoint("callsign",
-			influxTags,
+			tags,
 			map[string]interface{}{
 				"value":        l.Callsign,
 				"device_raw":   string(l.Dev),
@@ -28,6 +27,10 @@ func Feed(ctx context.Context, logChan chan *wiresx.Log, api influxdb2.WriteApiB
 				"description":  l.Description,
 			},
 			l.Timestamp)
+		if dry {
+			log.Printf("DRY: Sending message to InfluxDB: %+v", p)
+			continue
+		}
 		api.WritePoint(ctx, p)
 	}
 }

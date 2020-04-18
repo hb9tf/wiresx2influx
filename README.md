@@ -1,6 +1,6 @@
 # wiresx2influx
 
-Parses the Wires-X log file `WiresAccess.log` and forwards the entries to a InfluxDBv2 instance.
+Parses the Wires-X log file `WiresAccess.log` and forwards the entries to a InfluxDBv2 instance as well as feeding a Slack channel if desired.
 
 ## Config file
 
@@ -10,6 +10,8 @@ and *must* be named `wiresx2influx.conf`.
 The following is a copy and paste example of a config:
 
 ```
+repeater = "somerepeatername"
+
 [wiresx]
 logfile = "C:\\Users\\HB9TF\\OneDrive\\Documents\\WIRESXA\\AccHistory\\WiresAccess.log"
 ingest_whole_file = false
@@ -20,7 +22,11 @@ server = "http://127.0.0.1:9999"
 auth_token = "xyz"
 organization = "someorg"
 bucket = "somebucket"
-repeater = "somename"  # tag
+dry = false
+
+[slack]
+webhook = "https://hooks.slack.com/services/xyz"
+dry = false
 ```
 
 For `timezone`, refer to the "TZ database name" field in [this Wikipedia](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) article.
