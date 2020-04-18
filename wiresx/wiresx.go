@@ -1,7 +1,6 @@
-package main
+package wiresx
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"os"
@@ -9,9 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"4d63.com/tz"
 	"github.com/hpcloud/tail"
-	influxdb2 "github.com/influxdata/influxdb-client-go"
 )
 
 const (
@@ -57,7 +54,7 @@ func (d Device) InferDevice() string {
 }
 
 // https://github.com/HB9UF/unconfusion
-type WiresXLog struct {
+type Log struct {
 	Callsign    string
 	Dev         Device
 	Description string
@@ -135,7 +132,7 @@ func parseLocation(l string) (*Location, error) {
 	return &Location{lat, lon}, nil
 }
 
-func parseLogline(line string, timeLoc *time.Location) (*WiresXLog, error) {
+func parseLogline(line string, timeLoc *time.Location) (*Log, error) {
 	parts := strings.Split(line, "%")
 	if len(parts) != 13 {
 		return nil, fmt.Errorf("unexpected amount of tokens (want: 13): %s", line)
@@ -148,7 +145,7 @@ func parseLogline(line string, timeLoc *time.Location) (*WiresXLog, error) {
 	if err != nil {
 		log.Printf("invalid location: %s", parts[6])
 	}
-	return &WiresXLog{
+	return &Log{
 		Callsign:    strings.ToUpper(parts[0]),
 		Dev:         Device(strings.ToUpper(parts[1])),
 		Description: parts[2],
@@ -158,63 +155,12 @@ func parseLogline(line string, timeLoc *time.Location) (*WiresXLog, error) {
 	}, nil
 }
 
-func main() {
-	ctx := context.Background()
-
-	// TODO: Needs to move into a config file.
-	infile := "WiresAccess.log"
-	ingestWholeFile := false
-	timezone := "Europe/Zurich"
-	influxServer := "http://192.168.73.12:9999"
-	influxAuth := ""
-	influxOrg := "hb9tf"
-	influxBucket := "wiresx"
-	influxTags := map[string]string{
-		"relais":        "lszh",
-		"wiresx2influx": "0.1",
-	}
-
-	loc, err := tz.LoadLocation(timezone)
-	if err != nil {
-		log.Printf("unable to resolve location %q: %s", timezone, err)
-		os.Exit(1)
-	}
-
-	logChan := make(chan *WiresXLog, 100)
-
-	// Feed InfluxDB
-	influx := influxdb2.NewClient(influxServer, influxAuth)
-	writeApi := influx.WriteApiBlocking(influxOrg, influxBucket)
-	go func() {
-		for l := range logChan {
-			fmt.Printf("%s: Message from %q (%s)\n", l.Timestamp, l.Callsign, l.Dev.InferDevice())
-			var lat, lon float64
-			if l.Loc != nil {
-				lat = l.Loc.Lat
-				lon = l.Loc.Lon
-			}
-			p := influxdb2.NewPoint("callsign",
-				influxTags,
-				map[string]interface{}{
-					"value":        l.Callsign,
-					"device_raw":   string(l.Dev),
-					"device":       l.Dev.InferDevice(),
-					"source":       string(l.Source),
-					"location_lat": lat,
-					"location_lon": lon,
-					"description":  l.Description,
-				},
-				l.Timestamp)
-			writeApi.WritePoint(ctx, p)
-		}
-	}()
-
-	// Tail log
+func TailLog(path string, ingestWholeFile bool, loc *time.Location, logChan chan *Log) error {
 	whence := os.SEEK_END
 	if ingestWholeFile {
 		whence = os.SEEK_SET
 	}
-	t, err := tail.TailFile(infile, tail.Config{
+	t, err := tail.TailFile(path, tail.Config{
 		ReOpen:    true,  // Reopen recreated files (tail -F)
 		MustExist: true,  // Fail early if the file does not exist
 		Poll:      false, // Poll for file changes instead of using inotify
@@ -228,8 +174,7 @@ func main() {
 		},
 	})
 	if err != nil {
-		log.Printf("unable to tail file %q: %s", infile, err)
-		os.Exit(1)
+		return fmt.Errorf("unable to tail file %q: %s", path, err)
 	}
 	for line := range t.Lines {
 		wl, err := parseLogline(line.Text, loc)
@@ -239,5 +184,5 @@ func main() {
 		}
 		logChan <- wl
 	}
-	close(logChan)
+	return nil
 }
