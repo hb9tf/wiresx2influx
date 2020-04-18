@@ -1,5 +1,6 @@
 # wiresx2influx
-Parses the Wires-X log file and forwards the entries to a InfluxDB
+
+Parses the Wires-X log file `WiresAccess.log` and forwards the entries to a InfluxDBv2 instance.
 
 ## Config file
 
@@ -36,10 +37,7 @@ Alternatively (e.g. for development), it can be built/run with Go directly as we
 
 ```
 go build .
+./wiresx2influx
 ```
 
-or to run:
-
-```
-go run .
-```
+Note that you can't run it with `go run .` directly as it won't find the config file that way.
