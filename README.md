@@ -23,3 +23,23 @@ repeater = "somename"  # tag
 ```
 
 For `timezone`, refer to the "TZ database name" field in [this Wikipedia](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) article.
+
+## Build
+
+The current `Makefile` creates a Windows executable:
+
+```
+make
+```
+
+Alternatively (e.g. for development), it can be built/run with Go directly as well of course:
+
+```
+go build .
+```
+
+or to run:
+
+```
+go run .
+```
