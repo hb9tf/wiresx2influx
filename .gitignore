@@ -90,5 +90,6 @@ $RECYCLE.BIN/
 # Custom
 *.exe
 *.log
+*.conf
 
 # End of https://www.gitignore.io/api/go,macos,windows,visualstudiocode

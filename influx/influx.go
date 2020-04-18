@@ -2,7 +2,7 @@ package influx
 
 import (
 	"context"
-	"fmt"
+	"log"
 
 	"github.com/hb9tf/wiresx2influx/wiresx"
 	influxdb2 "github.com/influxdata/influxdb-client-go"
@@ -10,7 +10,7 @@ import (
 
 func Feed(ctx context.Context, logChan chan *wiresx.Log, api influxdb2.WriteApiBlocking, influxTags map[string]string) {
 	for l := range logChan {
-		fmt.Printf("%s: Message from %q (%s)\n", l.Timestamp, l.Callsign, l.Dev.InferDevice())
+		log.Printf("%s: Message from %q (%s)\n", l.Timestamp, l.Callsign, l.Dev.InferDevice())
 		var lat, lon float64
 		if l.Loc != nil {
 			lat = l.Loc.Lat

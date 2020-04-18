@@ -1,2 +1,25 @@
 # wiresx2influx
 Parses the Wires-X log file and forwards the entries to a InfluxDB
+
+## Config file
+
+The config file *must* be in the same directory with the binary
+and *must* be named `wiresx2influx.conf`.
+
+The following is a copy and paste example of a config:
+
+```
+[wiresx]
+logfile = "WiresAccess.log"
+ingest_whole_file = false
+timezone = "Europe/Zurich"
+
+[influx]
+server = "http://127.0.0.1:9999"
+auth_token = "xyz"
+organization = "someorg"
+bucket = "somebucket"
+repeater = "somename"  # tag
+```
+
+For `timezone`, refer to the "TZ database name" field in [this Wikipedia](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) article.
