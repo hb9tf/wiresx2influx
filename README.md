@@ -10,7 +10,7 @@ The following is a copy and paste example of a config:
 
 ```
 [wiresx]
-logfile = "WiresAccess.log"
+logfile = "C:\\Users\\HB9TF\\OneDrive\\Documents\\WIRESXA\\AccHistory\\WiresAccess.log"
 ingest_whole_file = false
 timezone = "Europe/Zurich"
 
