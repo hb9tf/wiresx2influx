@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hb9tf/wiresx2influx/geo"
 	"github.com/hpcloud/tail"
 )
 
@@ -60,19 +61,14 @@ type Log struct {
 	Description string
 	Timestamp   time.Time
 	Source      Activity
-	Loc         *Location
-}
-
-type Location struct {
-	Lat float64
-	Lon float64
+	Loc         *geo.Location
 }
 
 // parseLocation attempts to parse the WiresX log location format.
 // Examples:
 // N:36 48' 58" / W:084 10' 02"
 // Lat:N:46 01' 00" / Lon:E:007 44' 36" / R:001km /
-func parseLocation(l string) (*Location, error) {
+func parseLocation(l string) (*geo.Location, error) {
 	l = strings.TrimSpace(l)
 	if l == "" {
 		return nil, nil
@@ -129,7 +125,11 @@ func parseLocation(l string) (*Location, error) {
 		lon = lon * -1
 	}
 
-	return &Location{lat, lon}, nil
+	loc, err := geo.Lookup(lat, lon)
+	if err != nil {
+		return &geo.Location{Latitude: lat, Longitude: lon}, nil
+	}
+	return loc, nil
 }
 
 func parseLogline(line string, timeLoc *time.Location) (*Log, error) {

@@ -78,10 +78,14 @@ func (s *Slacker) Post(msg *Message) error {
 }
 
 func getSlackMsg(log *wiresx.Log) *Message {
+	loc := "unknown"
+	if log.Loc != nil {
+		loc = log.Loc.String()
+	}
 	return &Message{
 		Attachments: []Attachment{
 			{
-				Pretext: fmt.Sprintf("%s (%s, %s)", log.Callsign, log.Dev.InferDevice(), log.Source),
+				Pretext: fmt.Sprintf("%s (%s, %s): Location %s", log.Callsign, log.Dev.InferDevice(), log.Source, loc),
 				Ts:      json.Number(strconv.FormatInt(log.Timestamp.Unix(), 10)),
 			},
 		},

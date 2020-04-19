@@ -12,8 +12,8 @@ func Feed(ctx context.Context, logChan chan *wiresx.Log, api influxdb2.WriteApiB
 	for l := range logChan {
 		var lat, lon float64
 		if l.Loc != nil {
-			lat = l.Loc.Lat
-			lon = l.Loc.Lon
+			lat = l.Loc.Latitude
+			lon = l.Loc.Longitude
 		}
 		p := influxdb2.NewPoint("callsign",
 			tags,
