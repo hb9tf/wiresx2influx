@@ -81,6 +81,9 @@ func getSlackMsg(log *wiresx.Log) *Message {
 	loc := "unknown"
 	if log.Loc != nil {
 		loc = log.Loc.String()
+		if log.Loc.Latitude != 0 && log.Loc.Longitude != 0 {
+			loc = fmt.Sprintf("<https://www.google.com/maps/place/%f+%f|%s>", log.Loc.Latitude, log.Loc.Longitude, loc)
+		}
 	}
 	return &Message{
 		Attachments: []Attachment{
