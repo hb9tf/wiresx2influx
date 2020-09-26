@@ -20,6 +20,9 @@ func Feed(ctx context.Context, logChan chan *wiresx.Log, api influxdb2.WriteApiB
 		influxTags["device_raw"] = string(l.Dev)
 		influxTags["device"] = l.Dev.InferDevice()
 		influxTags["source"] = string(l.Source)
+		influxTags["location_lat"] = lat
+		influxTags["location_lon"] = lon
+		influxTags["description"] = l.Description
 		p := influxdb2.NewPoint("callsign",
 			influxTags,
 			map[string]interface{}{
