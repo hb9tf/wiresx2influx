@@ -2,8 +2,8 @@ package influx
 
 import (
 	"context"
-	"fmt"
 	"log"
+	"strconv"
 
 	"github.com/hb9tf/wiresx2influx/wiresx"
 	influxdb2 "github.com/influxdata/influxdb-client-go"
@@ -21,8 +21,8 @@ func Feed(ctx context.Context, logChan chan *wiresx.Log, api influxdb2.WriteApiB
 		influxTags["device_raw"] = string(l.Dev)
 		influxTags["device"] = l.Dev.InferDevice()
 		influxTags["source"] = string(l.Source)
-		influxTags["location_lat"] = fmt.Sprintf("%f", lat)
-		influxTags["location_lon"] = fmt.Sprintf("%f", lon)
+		influxTags["location_lat"] = strconv.FormatFloat(lat, 'f', -1, 64)
+		influxTags["location_lon"] = strconv.FormatFloat(lon, 'f', -1, 64)
 		influxTags["description"] = l.Description
 		p := influxdb2.NewPoint("callsign",
 			influxTags,
