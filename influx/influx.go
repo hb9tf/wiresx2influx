@@ -2,6 +2,7 @@ package influx
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/hb9tf/wiresx2influx/wiresx"
@@ -20,8 +21,8 @@ func Feed(ctx context.Context, logChan chan *wiresx.Log, api influxdb2.WriteApiB
 		influxTags["device_raw"] = string(l.Dev)
 		influxTags["device"] = l.Dev.InferDevice()
 		influxTags["source"] = string(l.Source)
-		influxTags["location_lat"] = lat
-		influxTags["location_lon"] = lon
+		influxTags["location_lat"] = fmt.Sprintf("%f", lat)
+		influxTags["location_lon"] = fmt.Sprintf("%f", lon)
 		influxTags["description"] = l.Description
 		p := influxdb2.NewPoint("callsign",
 			influxTags,
