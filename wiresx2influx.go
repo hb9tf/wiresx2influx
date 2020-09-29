@@ -5,8 +5,10 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"time"
 
-	"4d63.com/tz"
+	_ "time/tzdata"
+
 	"github.com/hb9tf/wiresx2influx/config"
 	"github.com/hb9tf/wiresx2influx/influx"
 	"github.com/hb9tf/wiresx2influx/wiresx"
@@ -31,7 +33,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	loc, err := tz.LoadLocation(conf.WiresX.Timezone)
+	loc, err := time.LoadLocation(conf.WiresX.Timezone)
 	if err != nil {
 		log.Printf("unable to resolve location %q: %s", conf.WiresX.Timezone, err)
 		os.Exit(1)

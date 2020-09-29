@@ -1,9 +1,8 @@
 module github.com/hb9tf/wiresx2influx
 
-go 1.13
+go 1.15
 
 require (
-	4d63.com/tz v1.1.0
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/hpcloud/tail v1.0.0
 	github.com/influxdata/influxdb-client-go v1.0.0
