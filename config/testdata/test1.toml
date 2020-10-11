@@ -1,0 +1,11 @@
+[wiresx]
+logfile = "logfile.log"
+ingest_whole_file = false
+timezone = "Europe/Zurich"
+
+[influx]
+server = "http://127.0.0.1:9999"
+auth_token = "xyz"
+organization = "someorg"
+bucket = "somebucket"
+repeater = "somename"
