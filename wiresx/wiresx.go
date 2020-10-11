@@ -2,8 +2,8 @@ package wiresx
 
 import (
 	"fmt"
+	"io"
 	"log"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -156,9 +156,9 @@ func parseLogline(line string, timeLoc *time.Location) (*Log, error) {
 }
 
 func TailLog(path string, ingestWholeFile bool, loc *time.Location, logChan chan *Log) error {
-	whence := os.SEEK_END
+	whence := io.SeekEnd
 	if ingestWholeFile {
-		whence = os.SEEK_SET
+		whence = io.SeekStart
 	}
 	t, err := tail.TailFile(path, tail.Config{
 		ReOpen:    true,  // Reopen recreated files (tail -F)

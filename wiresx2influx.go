@@ -43,9 +43,9 @@ func main() {
 
 	// Feed InfluxDB
 	client := influxdb2.NewClient(conf.Influx.Server, conf.Influx.AuthToken)
-	writeApi := client.WriteApiBlocking(conf.Influx.Organization, conf.Influx.Bucket)
+	writeAPI := client.WriteApiBlocking(conf.Influx.Organization, conf.Influx.Bucket)
 	go func() {
-		influx.Feed(ctx, logChan, writeApi, map[string]string{
+		influx.Feed(ctx, logChan, writeAPI, map[string]string{
 			"repeater": conf.Influx.Repeater,
 		})
 	}()
