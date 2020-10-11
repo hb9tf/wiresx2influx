@@ -1,3 +1,4 @@
+// Package config provides configuration reading functionality
 package config
 
 import (

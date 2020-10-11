@@ -1,3 +1,4 @@
+// Package wiresx provides wiresx log tailing and parsing
 package wiresx
 
 import (

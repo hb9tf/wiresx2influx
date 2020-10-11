@@ -1,3 +1,4 @@
+// Package influx provides InfluxDB feeding
 package influx
 
 import (
