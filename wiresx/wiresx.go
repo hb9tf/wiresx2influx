@@ -1,4 +1,4 @@
-// Package wiresx provides WiresX log tailing and parsing
+// Package wiresx provides WiresX log tailing and parsing.
 package wiresx
 
 import (
@@ -31,13 +31,13 @@ var deviceTypes = map[string]string{
 	"R":  "repeater",
 }
 
-// Activity defines an activity
+// Activity defines an activity.
 type Activity string
 
-// Device defines a device type
+// Device defines a device type.
 type Device string
 
-// InferDevice returns a string representation of the device type
+// InferDevice returns a string representation of the device type.
 func (d Device) InferDevice() string {
 	dev := strings.ToUpper(string(d))
 	for k, v := range deviceTypes {
@@ -55,7 +55,7 @@ func (d Device) InferDevice() string {
 	return "node"
 }
 
-// Log defines the data of a WiresX logentry, see also https://github.com/HB9UF/unconfusion
+// Log defines the data of a WiresX logentry, see also https://github.com/HB9UF/unconfusion.
 type Log struct {
 	Callsign    string
 	Dev         Device
@@ -65,7 +65,7 @@ type Log struct {
 	Loc         *Location
 }
 
-// Location defines a position with longitude and latitude
+// Location defines a position with longitude and latitude.
 type Location struct {
 	Lat float64
 	Lon float64
@@ -158,7 +158,7 @@ func parseLogline(line string, timeLoc *time.Location) (*Log, error) {
 	}, nil
 }
 
-// TailLog tails the logfile to parse the loglines and returns log entries into a channel
+// TailLog tails the logfile to parse the loglines and returns log entries into a channel.
 func TailLog(path string, ingestWholeFile bool, loc *time.Location, logChan chan *Log) error {
 	whence := io.SeekEnd
 	if ingestWholeFile {

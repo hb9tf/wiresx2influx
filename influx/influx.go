@@ -1,4 +1,4 @@
-// Package influx provides InfluxDB feeding
+// Package influx provides InfluxDB feeding.
 package influx
 
 import (
@@ -10,7 +10,7 @@ import (
 	influxdb2 "github.com/influxdata/influxdb-client-go"
 )
 
-// Feed reads log entries from the channel and writes them to InfluxDB
+// Feed reads log entries from the channel and writes them to InfluxDB.
 func Feed(ctx context.Context, logChan chan *wiresx.Log, api influxdb2.WriteApiBlocking, influxTags map[string]string) {
 	for l := range logChan {
 		log.Printf("%s: Message from %q (%s)\n", l.Timestamp, l.Callsign, l.Dev.InferDevice())
