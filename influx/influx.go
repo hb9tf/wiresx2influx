@@ -4,7 +4,6 @@ package influx
 import (
 	"context"
 	"log"
-	"strconv"
 
 	"github.com/hb9tf/wiresx2influx/wiresx"
 	influxdb2 "github.com/influxdata/influxdb-client-go"
@@ -19,18 +18,16 @@ func Feed(ctx context.Context, logChan chan *wiresx.Log, api influxdb2.WriteApiB
 			lat = l.Loc.Lat
 			lon = l.Loc.Lon
 		}
-		influxTags["callsign"] = l.Callsign
-		influxTags["device_raw"] = string(l.Dev)
-		influxTags["device"] = l.Dev.InferDevice()
-		influxTags["source"] = string(l.Source)
-		influxTags["location_lat"] = strconv.FormatFloat(lat, 'f', -1, 64)
-		influxTags["location_lon"] = strconv.FormatFloat(lon, 'f', -1, 64)
-		influxTags["description"] = l.Description
+
 		p := influxdb2.NewPoint("callsign",
 			influxTags,
 			map[string]interface{}{
 				"value":        l.Callsign,
+				"callsign":     l.Callsign,
 				"description":  l.Description,
+				"device":       l.Dev.InferDevice(),
+				"device_raw":   string(l.Dev),
+				"source":       string(l.Source),
 				"location_lat": lat,
 				"location_lon": lon,
 			},
