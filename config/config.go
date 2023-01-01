@@ -3,7 +3,7 @@ package config
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 
 	"github.com/influxdata/toml"
@@ -40,7 +40,7 @@ func Read(path string) (*Config, error) {
 		return nil, fmt.Errorf("unable to open file %q: %s", path, err)
 	}
 	defer f.Close()
-	buf, err := ioutil.ReadAll(f)
+	buf, err := io.ReadAll(f)
 	if err != nil {
 		return nil, fmt.Errorf("unable to read file %q: %s", path, err)
 	}
